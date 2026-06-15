@@ -6,6 +6,36 @@ function isSubstackImageUrl(url: string): boolean {
 		url.includes('.s3.amazonaws.com/public/images');
 }
 
+const VIDEO_PLACEHOLDER_RE = /VIDEOEMBED([a-f0-9-]{36})ENDVIDEO/g;
+
+function replaceVideoDivs(html: string, downloadedUrls: Set<string>): string {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(html, 'text/html');
+
+	for (const div of Array.from(doc.querySelectorAll('div[id^="media-"]'))) {
+		const id = div.getAttribute('id') ?? '';
+		if (id.length !== 42) continue;
+		const videoId = id.replace('media-', '');
+		const videoUrl = `https://substack.com/api/v1/video/upload/${videoId}/src`;
+		const p = doc.createElement('p');
+		if (downloadedUrls.has(videoUrl)) {
+			p.textContent = `VIDEOEMBED${videoId}ENDVIDEO`;
+		} else {
+			const a = doc.createElement('a');
+			a.href = videoUrl;
+			a.textContent = 'Video';
+			p.appendChild(a);
+		}
+		div.replaceWith(p);
+	}
+
+	return doc.body.innerHTML;
+}
+
+function restoreVideoWikilinks(md: string): string {
+	return md.replace(VIDEO_PLACEHOLDER_RE, '![[' + '$1.mp4]]');
+}
+
 export function createConverter(downloadedUrls: Set<string>): TurndownService {
 	const turndown = new TurndownService({
 		headingStyle: 'atx',
@@ -65,31 +95,12 @@ export function createConverter(downloadedUrls: Set<string>): TurndownService {
 		},
 	});
 
-	turndown.addRule('videoEmbed', {
-		filter: (node) => {
-			return node.nodeName === 'DIV' &&
-				node.getAttribute('data-component-name') === 'VideoEmbedPlayer';
-		},
-		replacement: (_content, node) => {
-			return node.outerHTML;
-		},
-	});
-
-	turndown.addRule('mediaDiv', {
-		filter: (node) => {
-			if (node.nodeName !== 'DIV') return false;
-			const id = node.getAttribute('id') ?? '';
-			return id.startsWith('media-') && id.length === 42;
-		},
-		replacement: (_content, node) => {
-			return node.outerHTML;
-		},
-	});
-
 	return turndown;
 }
 
 export function htmlToMarkdown(html: string, downloadedUrls: Set<string>): string {
+	const preprocessed = replaceVideoDivs(html, downloadedUrls);
 	const converter = createConverter(downloadedUrls);
-	return converter.turndown(html);
+	const md = converter.turndown(preprocessed);
+	return restoreVideoWikilinks(md);
 }

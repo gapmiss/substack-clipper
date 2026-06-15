@@ -52,23 +52,11 @@ export function postprocessMarkdown(md: string, domain: string, downloadedUrls: 
 		);
 	}
 
-	// embedded video divs → wikilinks or links
-	out = out.replace(
-		/<div [^>]*id="media-([^"]+)"[^>]*>.*<\/div>/g,
-		(_match, videoId: string) => {
-			const videoUrl = `https://api.substack.com/api/v1/video/upload/${videoId}/src`;
-			if (downloadedUrls.has(videoUrl)) {
-				return `![[${videoId}.mp4]]\n\n`;
-			}
-			return `[Video](${videoUrl})\n\n`;
-		},
-	);
-
 	// embedded audio → wikilinks or links
 	out = out.replace(
-		/[0-9×:-]+<audio [^>]*src="\/api\/v1\/audio\/upload\/([^"]+)\/src"[^>]*>.*<\/audio>/g,
+		/[0-9×:-]+<audio [^>]*src="\/api\/v1\/audio\/upload\/([^"]+)\/src"[^>]*>[\s\S]*?<\/audio>/g,
 		(_match, audioId: string) => {
-			const audioUrl = `https://api.substack.com/api/v1/audio/upload/${audioId}/src`;
+			const audioUrl = `https://substack.com/api/v1/audio/upload/${audioId}/src`;
 			if (downloadedUrls.has(audioUrl)) {
 				return `\n\n![[${audioId}.mp3]]\n\n`;
 			}
@@ -81,6 +69,10 @@ export function postprocessMarkdown(md: string, domain: string, downloadedUrls: 
 
 	// remove attachment icon images
 	out = out.replace(/!\[\]\(https%3A%2F%2Fsubstack\.com%2Fimg%2Fattachment_icon\.svg\) ?\n?/g, '');
+
+	// unescape brackets escaped by Turndown in plain text
+	out = out.replace(/\\\[/g, '[');
+	out = out.replace(/\\\]/g, ']');
 
 	// PDF download links → wikilinks or keep original links
 	out = out.replace(
