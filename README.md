@@ -66,9 +66,9 @@ The main note includes frontmatter with title, subtitle, type, audience, date, c
 | Setting | Default | Description |
 |---------|---------|-------------|
 | Save directory | `Substacks` | Vault-relative folder for saved posts |
-| Download media | On | Download videos, audio, podcasts, and transcripts (images and attachments always download) |
+| Download media | Off | Download videos, audio, podcasts, and transcripts (images and attachments always download) |
 | maxFileSize | `0` | Skip media files larger than this (MB). 0 = no limit. Only visible when downloadMedia is enabled. |
-| Download comments | On | Fetch and save threaded comments |
+| Download comments | Off | Fetch and save threaded comments |
 | Comment sort order | Most recent first | Sort order for comments (most recent, oldest, or best) |
 | Save raw JSON | Off | Save the raw Substack API JSON |
 | Save raw HTML | Off | Save the raw article HTML |
