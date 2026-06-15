@@ -1,43 +1,43 @@
 {
-  "name": "substack-clipper",
-  "version": "0.1.0",
-  "description": "Clip substack articles",
-  "main": "main.js",
-  "scripts": {
-    "dev": "node esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "lint": "eslint src/",
-    "version": "node version-bump.mjs && git add manifest.json versions.json",
+	"name": "substack-clipper",
+	"version": "0.1.1",
+	"description": "Clip substack articles",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"lint": "eslint src/",
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"release": "node release.mjs",
 		"release:minor": "node release.mjs minor",
 		"release:major": "node release.mjs major"
-  },
-  "keywords": [
-    "obsidian",
-    "obsidian-plugin"
-  ],
-  "author": "@gapmiss",
-  "license": "MIT",
-  "devDependencies": {
-    "@eslint/js": "^9.30.1",
-    "@types/node": "^16.11.6",
-    "@types/turndown": "^5.0.6",
-    "@typescript-eslint/parser": "^8.35.1",
-    "esbuild": "^0.28.1",
-    "eslint": "^9.30.1",
-    "eslint-plugin-no-unsanitized": "^4.1.2",
-    "eslint-plugin-obsidianmd": "^0.3.0",
-    "globals": "^14.0.0",
-    "jiti": "^2.6.1",
-    "tslib": "^2.4.0",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.35.1"
-  },
-  "dependencies": {
-    "obsidian": "latest",
-    "turndown": "^7.2.4"
-  },
-  "allowScripts": {
-    "esbuild@0.28.1": true
-  }
+	},
+	"keywords": [
+		"obsidian",
+		"obsidian-plugin"
+	],
+	"author": "@gapmiss",
+	"license": "MIT",
+	"devDependencies": {
+		"@eslint/js": "^9.30.1",
+		"@types/node": "^16.11.6",
+		"@types/turndown": "^5.0.6",
+		"@typescript-eslint/parser": "^8.35.1",
+		"esbuild": "^0.28.1",
+		"eslint": "^9.30.1",
+		"eslint-plugin-no-unsanitized": "^4.1.2",
+		"eslint-plugin-obsidianmd": "^0.3.0",
+		"globals": "^14.0.0",
+		"jiti": "^2.6.1",
+		"tslib": "^2.4.0",
+		"typescript": "^5.8.2",
+		"typescript-eslint": "^8.35.1"
+	},
+	"dependencies": {
+		"obsidian": "latest",
+		"turndown": "^7.2.4"
+	},
+	"allowScripts": {
+		"esbuild@0.28.1": true
+	}
 }

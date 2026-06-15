@@ -1,10 +1,10 @@
 {
-  "id": "substack-clipper",
-  "name": "Substack Clipper",
-  "version": "0.1.0",
-  "minAppVersion": "1.13.0",
-  "description": "Archive Substack posts as Markdown with images, media, and comments.",
-  "author": "@gapmiss",
-  "authorUrl": "https://github.com/gapmiss",
-  "isDesktopOnly": false
+	"id": "substack-clipper",
+	"name": "Substack Clipper",
+	"version": "0.1.1",
+	"minAppVersion": "1.13.0",
+	"description": "Archive Substack posts as Markdown with images, media, and comments.",
+	"author": "@gapmiss",
+	"authorUrl": "https://github.com/gapmiss",
+	"isDesktopOnly": false
 }
