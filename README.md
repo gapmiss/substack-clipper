@@ -15,16 +15,28 @@ Archive Substack posts as Obsidian-flavored Markdown with images, media, and thr
 
 ## Installation
 
-### From community plugins
+[Install from community.obsidian.md](https://community.obsidian.md/plugins/substack-clipper)
 
-Search for **Substack Clipper** in Obsidian's community plugin browser.
+From Obsidian's settings or preferences:
 
-### Manual
+1. Community Plugins > Browse
+2. Search for "Substack Clipper"
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](../../releases/latest).
-2. Create a folder at `{your-vault}/.obsidian/plugins/substack-clipper/`.
-3. Copy the three files into that folder.
-4. Reload Obsidian and enable the plugin in Settings > Community plugins.
+Manually:
+
+1. download the latest [release](https://github.com/gapmiss/substack-clipper/releases/latest) archive
+2. uncompress the downloaded archive
+3. move the `substack-clipper` folder to `/path/to/vault/.obsidian/plugins/` 
+4.  Settings > Community plugins > reload **Installed plugins**
+5.  enable plugin
+
+or:
+
+1.  download `main.js`, `manifest.json` & `styles.css` from the latest [release](https://github.com/gapmiss/substack-clipper/releases/latest)
+2.  create a new folder `/path/to/vault/.obsidian/plugins/substack-clipper`
+3.  move all 3 files to `/path/to/vault/.obsidian/plugins/substack-clipper`
+4.  Settings > Community plugins > reload **Installed plugins**
+5.  enable plugin
 
 ## Usage
 
@@ -55,6 +67,7 @@ The main note includes frontmatter with title, subtitle, type, audience, date, c
 |---------|---------|-------------|
 | Save directory | `Substacks` | Vault-relative folder for saved posts |
 | Download media | On | Download videos, audio, podcasts, and transcripts (images and attachments always download) |
+| maxFileSize | `0` | Skip media files larger than this (MB). 0 = no limit. Only visible when downloadMedia is enabled. |
 | Download comments | On | Fetch and save threaded comments |
 | Comment sort order | Most recent first | Sort order for comments (most recent, oldest, or best) |
 | Save raw JSON | Off | Save the raw Substack API JSON |
