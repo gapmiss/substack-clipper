@@ -98,7 +98,7 @@ export default class SubstackClipperPlugin extends Plugin {
 				}
 			}
 
-			let processedMd = postprocessMarkdown(markdown, domain, downloadResult.downloaded);
+			let processedMd = postprocessMarkdown(markdown, downloadResult.downloaded);
 
 			// Build podcast/video/transcript sections
 			let podcastVideoPlayer = '';

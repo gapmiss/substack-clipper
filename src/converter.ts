@@ -95,6 +95,39 @@ export function createConverter(downloadedUrls: Set<string>): TurndownService {
 		},
 	});
 
+	turndown.addRule('footnoteRef', {
+		filter: (node) => {
+			if (node.nodeName !== 'A') return false;
+			return /^#footnote-\d+$/.test(node.getAttribute('href') ?? '');
+		},
+		replacement: (content) => `[^${content.trim()}]`,
+	});
+
+	turndown.addRule('footnoteBackLink', {
+		filter: (node) => {
+			if (node.nodeName !== 'A') return false;
+			return /^#footnote-anchor-\d+$/.test(node.getAttribute('href') ?? '');
+		},
+		replacement: () => '',
+	});
+
+	turndown.addRule('footnoteDef', {
+		filter: (node) => {
+			if (node.nodeName !== 'DIV') return false;
+			const backLink = node.querySelector('a[href^="#footnote-anchor-"]');
+			return backLink !== null && backLink.parentElement === node;
+		},
+		replacement: (content, node) => {
+			const anchor = node.querySelector('a[href^="#footnote-anchor-"]');
+			const num = (anchor?.textContent ?? '').trim();
+			const text = content.trim();
+			const indented = text.split('\n').map((line, i) =>
+				i === 0 || line === '' ? line : '    ' + line
+			).join('\n');
+			return `\n\n[^${num}]: ${indented}\n\n`;
+		},
+	});
+
 	return turndown;
 }
 

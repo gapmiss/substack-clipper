@@ -1,4 +1,4 @@
-export function postprocessMarkdown(md: string, domain: string, downloadedUrls: Set<string>): string {
+export function postprocessMarkdown(md: string, downloadedUrls: Set<string>): string {
 	let out = md;
 
 	// iframe spacing
@@ -10,17 +10,6 @@ export function postprocessMarkdown(md: string, domain: string, downloadedUrls: 
 
 	// fix headings glued to links
 	out = out.replace(/(\))(#{1,6})/g, '$1\n\n$2');
-
-	// footnotes
-	const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	out = out.replace(
-		new RegExp(`\\[(\\d)\\]\\(${escapedDomain}/p/([a-zA-Z0-9-]+)#footnote-\\d-\\d+\\)`, 'g'),
-		'[^$1]',
-	);
-	out = out.replace(
-		new RegExp(`\\[(\\d)\\]\\(${escapedDomain}/p/([a-zA-Z0-9-]+)#footnote-anchor-\\d-\\d+\\)`, 'g'),
-		'[^$1]: ',
-	);
 
 	// truncated post previews
 	out = out.replace(
