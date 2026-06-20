@@ -1,4 +1,4 @@
-import { normalizePath, Notice, Plugin } from 'obsidian';
+import { normalizePath, Notice, Plugin, TFile } from 'obsidian';
 import { type SubstackClipperSettings, DEFAULT_SETTINGS } from './types';
 import type { ParsedArticle, DownloadResult } from './types';
 import { SettingsTab } from './settings';
@@ -18,10 +18,14 @@ export default class SubstackClipperPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'clip-post',
-			name: 'Clip substack post',
+			name: 'Save substack post',
 			callback: () => {
-				new ClipModal(this.app, (url) => {
-					void this.clipPost(url);
+				new ClipModal(this.app, this.settings.openAfterClip, (url, openAfterClip) => {
+					if (openAfterClip !== this.settings.openAfterClip) {
+						this.settings.openAfterClip = openAfterClip;
+						void this.saveSettings();
+					}
+					void this.clipPost(url, openAfterClip);
 				}).open();
 			},
 		});
@@ -35,8 +39,8 @@ export default class SubstackClipperPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	private async clipPost(url: string): Promise<void> {
-		const notice = new Notice('Clipping...', 0);
+	private async clipPost(url: string, openAfterClip: boolean): Promise<void> {
+		const notice = new Notice('Saving...', 0);
 
 		try {
 			const { username, slug, domain } = parseUrl(url);
@@ -189,12 +193,19 @@ export default class SubstackClipperPlugin extends Plugin {
 				await this.writeFile(htmlPath, article.html);
 			}
 
+			if (openAfterClip) {
+				const file = this.app.vault.getAbstractFileByPath(notePath);
+				if (file instanceof TFile) {
+					await this.app.workspace.getLeaf(false).openFile(file);
+				}
+			}
+
 			notice.hide();
-			new Notice(`Clipped: ${article.title}`);
+			new Notice(`Saved: ${article.title}`);
 
 		} catch (e) {
 			notice.hide();
-			new Notice(`Clip failed: ${e instanceof Error ? e.message : String(e)}`);
+			new Notice(`Save failed: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	}
 

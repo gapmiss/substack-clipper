@@ -2,17 +2,19 @@ import { App, Modal, Notice, Setting } from 'obsidian';
 
 export class ClipModal extends Modal {
 	private url = '';
-	private onSubmit: (url: string) => void;
+	private openAfterClip: boolean;
+	private onSubmit: (url: string, openAfterClip: boolean) => void;
 
-	constructor(app: App, onSubmit: (url: string) => void) {
+	constructor(app: App, openAfterClip: boolean, onSubmit: (url: string, openAfterClip: boolean) => void) {
 		super(app);
+		this.openAfterClip = openAfterClip;
 		this.onSubmit = onSubmit;
 	}
 
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.addClass('substack-clipper-modal');
-		contentEl.createEl('h2', { text: 'Clip substack post' });
+		contentEl.createEl('h2', { text: 'Save substack post' });
 
 		new Setting(contentEl)
 			.setName('Post URL')
@@ -30,8 +32,14 @@ export class ClipModal extends Modal {
 			});
 
 		new Setting(contentEl)
+			.setName('Open after saving')
+			.addToggle(toggle => toggle
+				.setValue(this.openAfterClip)
+				.onChange(value => { this.openAfterClip = value; }));
+
+		new Setting(contentEl)
 			.addButton(btn => btn
-				.setButtonText('Clip')
+				.setButtonText('Save')
 				.setCta()
 				.onClick(() => { this.submit(); }));
 	}
@@ -42,7 +50,7 @@ export class ClipModal extends Modal {
 			return;
 		}
 		this.close();
-		this.onSubmit(this.url);
+		this.onSubmit(this.url, this.openAfterClip);
 	}
 
 	onClose(): void {

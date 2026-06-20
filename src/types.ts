@@ -32,6 +32,7 @@ export interface SubstackClipperSettings {
 	saveRawJson: boolean;
 	saveRawHtml: boolean;
 	commentSort: 'most_recent_first' | 'oldest_first' | 'best_first';
+	openAfterClip: boolean;
 }
 
 export const DEFAULT_SETTINGS: SubstackClipperSettings = {
@@ -42,6 +43,7 @@ export const DEFAULT_SETTINGS: SubstackClipperSettings = {
 	saveRawJson: false,
 	saveRawHtml: false,
 	commentSort: 'most_recent_first',
+	openAfterClip: false,
 };
 
 export interface DownloadResult {
