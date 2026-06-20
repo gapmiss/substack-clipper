@@ -20,7 +20,7 @@ export class SettingsTab extends PluginSettingTab {
 						name: 'Save directory',
 						desc: 'Vault-relative folder path for clipped posts.',
 						control: {
-							type: 'text',
+							type: 'folder',
 							key: 'saveDirectory',
 							placeholder: 'Substacks',
 						},
