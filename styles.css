@@ -11,10 +11,17 @@
 	width: 60px;
 }
 
+.substack-clipper-history-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: var(--size-4-3);
+	gap: var(--size-4-2);
+}
+
 .substack-clipper-history-search {
 	width: 100%;
 	padding: var(--size-4-2);
-	margin-bottom: var(--size-4-2);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--radius-s);
 	background: var(--background-primary);
@@ -23,15 +30,32 @@
 }
 
 .substack-clipper-history-list {
-	max-height: 400px;
+	flex: 1;
 	overflow-y: auto;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--radius-s);
 }
 
-.substack-clipper-history-row {
+.substack-clipper-history-header {
 	display: flex;
 	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-1) var(--size-4-3);
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.substack-clipper-history-count {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.substack-clipper-history-row {
+	display: flex;
+	align-items: flex-start;
 	gap: var(--size-4-2);
 	padding: var(--size-4-2) var(--size-4-3);
 	min-height: 44px;
@@ -47,19 +71,24 @@
 	flex-direction: column;
 	flex: 1;
 	min-width: 0;
+	gap: var(--size-4-1);
 }
 
 .substack-clipper-history-title {
 	font-weight: var(--font-semibold);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+}
+
+.substack-clipper-history-meta {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--size-4-1) var(--size-4-2);
 }
 
 .substack-clipper-history-userline {
 	display: flex;
 	align-items: center;
-	gap: var(--size-4-2);
+	gap: var(--size-4-1);
 }
 
 .substack-clipper-history-username {
@@ -88,8 +117,9 @@
 
 .substack-clipper-history-actions {
 	display: flex;
-	gap: var(--size-4-1);
+	gap: 0;
 	flex-shrink: 0;
+	margin-left: auto;
 }
 
 .substack-clipper-history-empty {

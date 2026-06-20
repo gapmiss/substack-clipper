@@ -3,7 +3,7 @@ import { type SubstackClipperSettings, DEFAULT_SETTINGS } from './types';
 import type { ParsedArticle, DownloadResult, HistoryEntry } from './types';
 import { SettingsTab } from './settings';
 import { ClipModal } from './modal';
-import { HistoryModal } from './history-modal';
+import { HistoryView, HISTORY_VIEW_TYPE } from './history-view';
 import { fetchHtml, extractPreloads, parsePost, parseUrl, extractImages, extractVideos, extractAudios, extractAttachments } from './parser';
 import { htmlToMarkdown } from './converter';
 import { postprocessMarkdown } from './postprocess';
@@ -16,6 +16,8 @@ export default class SubstackClipperPlugin extends Plugin {
 	async onload(): Promise<void> {
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
+
+		this.registerView(HISTORY_VIEW_TYPE, (leaf) => new HistoryView(leaf, this));
 
 		this.addCommand({
 			id: 'clip-post',
@@ -33,11 +35,23 @@ export default class SubstackClipperPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'view-history',
-			name: 'View history',
+			name: 'View save history',
 			callback: () => {
-				new HistoryModal(this).open();
+				void this.activateHistoryView();
 			},
 		});
+	}
+
+	async activateHistoryView(): Promise<void> {
+		const { workspace } = this.app;
+		let leaf = workspace.getLeavesOfType(HISTORY_VIEW_TYPE)[0];
+		if (!leaf) {
+			const rightLeaf = workspace.getRightLeaf(false);
+			if (!rightLeaf) return;
+			await rightLeaf.setViewState({ type: HISTORY_VIEW_TYPE, active: true });
+			leaf = rightLeaf;
+		}
+		await workspace.revealLeaf(leaf);
 	}
 
 	async loadSettings(): Promise<void> {
@@ -227,6 +241,12 @@ export default class SubstackClipperPlugin extends Plugin {
 				this.settings.history = this.settings.history.slice(-this.settings.maxHistoryLength);
 			}
 			await this.saveSettings();
+
+			for (const leaf of this.app.workspace.getLeavesOfType(HISTORY_VIEW_TYPE)) {
+				if (leaf.view instanceof HistoryView) {
+					leaf.view.refresh();
+				}
+			}
 
 		} catch (e) {
 			notice.hide();

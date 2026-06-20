@@ -1,25 +1,37 @@
-import { Modal, normalizePath, Notice, setIcon, TFile } from 'obsidian';
+import { ItemView, normalizePath, Notice, setIcon, TFile, type WorkspaceLeaf } from 'obsidian';
 import type SubstackClipperPlugin from './main';
 import type { HistoryEntry } from './types';
 import { fetchComments, renderComments } from './comments';
 
-export class HistoryModal extends Modal {
+export const HISTORY_VIEW_TYPE = 'substack-clipper-history';
+
+export class HistoryView extends ItemView {
 	private plugin: SubstackClipperPlugin;
 	private filterText = '';
 	private listEl: HTMLElement;
 	private statusEl: HTMLElement;
 	private selectedEntries: Set<number> = new Set();
 
-	constructor(plugin: SubstackClipperPlugin) {
-		super(plugin.app);
+	constructor(leaf: WorkspaceLeaf, plugin: SubstackClipperPlugin) {
+		super(leaf);
 		this.plugin = plugin;
 	}
 
-	onOpen(): void {
-		this.setTitle('Substack save history');
-		this.modalEl.addClass('substack-clipper-history-modal');
+	getViewType(): string {
+		return HISTORY_VIEW_TYPE;
+	}
 
+	getDisplayText(): string {
+		return 'Save history';
+	}
+
+	getIcon(): string {
+		return 'history';
+	}
+
+	async onOpen(): Promise<void> {
 		const { contentEl } = this;
+		contentEl.addClass('substack-clipper-history-view');
 
 		const searchInput = contentEl.createEl('input', {
 			type: 'text',
@@ -51,6 +63,14 @@ export class HistoryModal extends Modal {
 		this.renderList();
 	}
 
+	async onClose(): Promise<void> {
+		this.contentEl.empty();
+	}
+
+	refresh(): void {
+		this.renderList();
+	}
+
 	private getFilteredEntries(): HistoryEntry[] {
 		const reversed = [...this.plugin.settings.history].reverse();
 		if (!this.filterText) return reversed;
@@ -68,11 +88,23 @@ export class HistoryModal extends Modal {
 
 		if (entries.length === 0) {
 			this.listEl.createDiv({
-				text: 'No matching entries.',
+				text: this.plugin.settings.history.length === 0
+					? 'No saved posts yet.'
+					: 'No matching entries.',
 				cls: 'substack-clipper-history-empty',
 			});
 			return;
 		}
+
+		const header = this.listEl.createDiv({ cls: 'substack-clipper-history-header' });
+		const selectAllCb = header.createEl('input', { type: 'checkbox' });
+		selectAllCb.setAttribute('aria-label', 'Select all entries');
+		header.createEl('span', {
+			text: `${String(entries.length)} ${entries.length === 1 ? 'entry' : 'entries'}`,
+			cls: 'substack-clipper-history-count',
+		});
+
+		const rowCheckboxes: { checkbox: HTMLInputElement; idx: number }[] = [];
 
 		for (const entry of entries) {
 			const row = this.listEl.createDiv({ cls: 'substack-clipper-history-row' });
@@ -80,17 +112,25 @@ export class HistoryModal extends Modal {
 			const checkbox = row.createEl('input', { type: 'checkbox' });
 			checkbox.setAttribute('aria-label', `Select ${entry.title}`);
 			const idx = this.plugin.settings.history.indexOf(entry);
+			rowCheckboxes.push({ checkbox, idx });
+
 			checkbox.addEventListener('change', () => {
 				if (checkbox.checked) {
 					this.selectedEntries.add(idx);
 				} else {
 					this.selectedEntries.delete(idx);
 				}
+				const total = rowCheckboxes.length;
+				const checked = rowCheckboxes.filter(r => r.checkbox.checked).length;
+				selectAllCb.checked = checked === total;
+				selectAllCb.indeterminate = checked > 0 && checked < total;
 			});
 
 			const info = row.createDiv({ cls: 'substack-clipper-history-info' });
 			info.createEl('span', { text: entry.title, cls: 'substack-clipper-history-title' });
-			const userLine = info.createDiv({ cls: 'substack-clipper-history-userline' });
+
+			const meta = info.createDiv({ cls: 'substack-clipper-history-meta' });
+			const userLine = meta.createDiv({ cls: 'substack-clipper-history-userline' });
 			userLine.createEl('span', { text: entry.username, cls: 'substack-clipper-history-username' });
 			if (entry.commentCount > 0) {
 				userLine.createEl('span', {
@@ -99,12 +139,12 @@ export class HistoryModal extends Modal {
 				});
 			}
 
-			row.createEl('span', {
+			meta.createEl('span', {
 				text: new Date(entry.dateSaved).toLocaleDateString(),
 				cls: 'substack-clipper-history-date',
 			});
 
-			const actions = row.createDiv({ cls: 'substack-clipper-history-actions' });
+			const actions = meta.createDiv({ cls: 'substack-clipper-history-actions' });
 
 			const noteBtn = actions.createEl('button', { cls: 'clickable-icon' });
 			noteBtn.setAttribute('aria-label', 'Open saved note');
@@ -117,7 +157,6 @@ export class HistoryModal extends Modal {
 				const file = this.app.vault.getAbstractFileByPath(notePath);
 				if (file instanceof TFile) {
 					void this.app.workspace.getLeaf(false).openFile(file);
-					this.close();
 				} else {
 					new Notice('Note not found in vault.');
 				}
@@ -141,6 +180,18 @@ export class HistoryModal extends Modal {
 				this.renderList();
 			});
 		}
+
+		selectAllCb.addEventListener('change', () => {
+			const checked = selectAllCb.checked;
+			for (const { checkbox, idx } of rowCheckboxes) {
+				checkbox.checked = checked;
+				if (checked) {
+					this.selectedEntries.add(idx);
+				} else {
+					this.selectedEntries.delete(idx);
+				}
+			}
+		});
 	}
 
 	private async redownloadComments(btn: HTMLButtonElement): Promise<void> {
