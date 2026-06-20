@@ -6,3 +6,107 @@
 .substack-clipper-modal input[type="text"] {
 	width: 100%;
 }
+
+.substack-clipper-truncate-input {
+	width: 60px;
+}
+
+.substack-clipper-history-search {
+	width: 100%;
+	padding: var(--size-4-2);
+	margin-bottom: var(--size-4-2);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-medium);
+}
+
+.substack-clipper-history-list {
+	max-height: 400px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+}
+
+.substack-clipper-history-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
+	min-height: 44px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.substack-clipper-history-row:last-child {
+	border-bottom: none;
+}
+
+.substack-clipper-history-info {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+}
+
+.substack-clipper-history-title {
+	font-weight: var(--font-semibold);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.substack-clipper-history-userline {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+}
+
+.substack-clipper-history-username {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.substack-clipper-history-badge {
+	font-size: 11px;
+	color: var(--text-on-accent);
+	background: var(--interactive-accent);
+	min-width: 20px;
+	height: 20px;
+	padding: 0 5px;
+	border-radius: 10px;
+	line-height: 20px;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.substack-clipper-history-date {
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	white-space: nowrap;
+}
+
+.substack-clipper-history-actions {
+	display: flex;
+	gap: var(--size-4-1);
+	flex-shrink: 0;
+}
+
+.substack-clipper-history-empty {
+	padding: var(--size-4-4);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.substack-clipper-history-status {
+	padding: var(--size-4-2) 0;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	min-height: var(--size-4-4);
+}
+
+.substack-clipper-history-footer {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: var(--size-4-2);
+}

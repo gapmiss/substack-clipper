@@ -1,5 +1,5 @@
-import { App, PluginSettingTab } from 'obsidian';
-import type { SettingDefinitionItem } from 'obsidian';
+import { App, Notice, PluginSettingTab } from 'obsidian';
+import type { Setting, SettingDefinitionItem } from 'obsidian';
 import type SubstackClipperPlugin from './main';
 
 export class SettingsTab extends PluginSettingTab {
@@ -68,6 +68,47 @@ export class SettingsTab extends PluginSettingTab {
 								oldest_first: 'Oldest first',
 								best_first: 'Best first',
 							},
+						},
+					},
+				],
+			},
+			{
+				type: 'group',
+				heading: 'History',
+				items: [
+					{
+						name: 'Max history length',
+						desc: 'Maximum number of entries to keep. 0 means unlimited.',
+						control: {
+							type: 'number',
+							key: 'maxHistoryLength',
+						},
+					},
+					{
+						name: 'Truncate history',
+						desc: 'Keep only the newest entries and discard the rest.',
+						render: (setting: Setting) => {
+							let truncateValue = 10;
+							setting
+								.addText(text => {
+									text.setPlaceholder('10');
+									text.inputEl.type = 'number';
+									text.inputEl.addClass('substack-clipper-truncate-input');
+									text.onChange(v => { truncateValue = parseInt(v) || 10; });
+								})
+								.addButton(btn => {
+									btn.setButtonText('Truncate').setDestructive();
+									btn.onClick(() => {
+										const history = this.plugin.settings.history;
+										if (truncateValue >= history.length) {
+											new Notice(`History already has ${String(history.length)} entries.`);
+											return;
+										}
+										this.plugin.settings.history = history.slice(-truncateValue);
+										void this.plugin.saveSettings();
+										new Notice(`History truncated to ${String(truncateValue)} entries.`);
+									});
+								});
 						},
 					},
 				],

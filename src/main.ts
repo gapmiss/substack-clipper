@@ -1,8 +1,9 @@
 import { normalizePath, Notice, Plugin, TFile } from 'obsidian';
 import { type SubstackClipperSettings, DEFAULT_SETTINGS } from './types';
-import type { ParsedArticle, DownloadResult } from './types';
+import type { ParsedArticle, DownloadResult, HistoryEntry } from './types';
 import { SettingsTab } from './settings';
 import { ClipModal } from './modal';
+import { HistoryModal } from './history-modal';
 import { fetchHtml, extractPreloads, parsePost, parseUrl, extractImages, extractVideos, extractAudios, extractAttachments } from './parser';
 import { htmlToMarkdown } from './converter';
 import { postprocessMarkdown } from './postprocess';
@@ -27,6 +28,14 @@ export default class SubstackClipperPlugin extends Plugin {
 					}
 					void this.clipPost(url, openAfterClip);
 				}).open();
+			},
+		});
+
+		this.addCommand({
+			id: 'view-history',
+			name: 'View history',
+			callback: () => {
+				new HistoryModal(this).open();
 			},
 		});
 	}
@@ -203,6 +212,22 @@ export default class SubstackClipperPlugin extends Plugin {
 			notice.hide();
 			new Notice(`Saved: ${article.title}`);
 
+			const entry: HistoryEntry = {
+				url,
+				title: article.title,
+				username,
+				slug,
+				dateSaved: new Date().toISOString(),
+				postId: article.id,
+				domain,
+				commentCount: article.commentCount,
+			};
+			this.settings.history.push(entry);
+			if (this.settings.maxHistoryLength > 0) {
+				this.settings.history = this.settings.history.slice(-this.settings.maxHistoryLength);
+			}
+			await this.saveSettings();
+
 		} catch (e) {
 			notice.hide();
 			new Notice(`Save failed: ${e instanceof Error ? e.message : String(e)}`);
@@ -264,7 +289,7 @@ export default class SubstackClipperPlugin extends Plugin {
 		}
 	}
 
-	private async writeFile(path: string, content: string): Promise<void> {
+	async writeFile(path: string, content: string): Promise<void> {
 		const normalized = normalizePath(path);
 		const folder = normalized.substring(0, normalized.lastIndexOf('/'));
 		await this.ensureFolder(folder);

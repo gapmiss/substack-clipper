@@ -33,6 +33,8 @@ export interface SubstackClipperSettings {
 	saveRawHtml: boolean;
 	commentSort: 'most_recent_first' | 'oldest_first' | 'best_first';
 	openAfterClip: boolean;
+	maxHistoryLength: number;
+	history: HistoryEntry[];
 }
 
 export const DEFAULT_SETTINGS: SubstackClipperSettings = {
@@ -44,7 +46,21 @@ export const DEFAULT_SETTINGS: SubstackClipperSettings = {
 	saveRawHtml: false,
 	commentSort: 'most_recent_first',
 	openAfterClip: false,
+	maxHistoryLength: 0,
+	history: [],
 };
+
+export interface HistoryEntry {
+	url: string;
+	title: string;
+	username: string;
+	slug: string;
+	dateSaved: string;
+	postId: number;
+	domain: string;
+	commentCount: number;
+	lastUpdated?: string;
+}
 
 export interface DownloadResult {
 	downloaded: Set<string>;
