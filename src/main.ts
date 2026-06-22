@@ -108,12 +108,12 @@ export default class SubstackClipperPlugin extends Plugin {
 				try {
 					const commentsData = await fetchComments(domain, article.id, this.settings.commentSort);
 
-					if (this.settings.saveRawJson) {
-						const commentsJsonPath = normalizePath(`${saveDir}/${slug}-comments.json`);
-						await this.writeFile(commentsJsonPath, JSON.stringify(commentsData, null, 2));
-					}
-
 					if (commentsData.comments && commentsData.comments.length > 0) {
+						if (this.settings.saveRawJson) {
+							const commentsJsonPath = normalizePath(`${saveDir}/${slug}-comments.json`);
+							await this.writeFile(commentsJsonPath, JSON.stringify(commentsData, null, 2));
+						}
+
 						const commentsMd = renderComments(commentsData, slug, domain);
 						const commentsPath = normalizePath(`${this.settings.saveDirectory}/${username}/${slug}-comments.md`);
 						await this.writeFile(commentsPath, commentsMd);
