@@ -43,7 +43,7 @@ export function postprocessMarkdown(md: string, downloadedUrls: Set<string>): st
 
 	// embedded audio → wikilinks or links
 	out = out.replace(
-		/[0-9×:-]+<audio [^>]*src="\/api\/v1\/audio\/upload\/([^"]+)\/src"[^>]*>[\s\S]*?<\/audio>/g,
+		/<audio [^>]*src="\/api\/v1\/audio\/upload\/([^"]+)\/src"[^>]*>[\s\S]*?<\/audio>/g,
 		(_match, audioId: string) => {
 			const audioUrl = `https://substack.com/api/v1/audio/upload/${audioId}/src`;
 			if (downloadedUrls.has(audioUrl)) {
