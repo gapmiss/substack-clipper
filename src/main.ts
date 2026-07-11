@@ -64,6 +64,7 @@ export default class SubstackClipperPlugin extends Plugin {
 
 	private async clipPost(url: string, openAfterClip: boolean): Promise<void> {
 		const notice = new Notice('Saving...', 0);
+		notice.containerEl.addClass("is-loading");
 
 		try {
 			const { username, slug, domain } = parseUrl(url);
