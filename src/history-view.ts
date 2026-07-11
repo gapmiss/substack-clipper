@@ -9,7 +9,7 @@ export class HistoryView extends ItemView {
 	private plugin: SubstackClipperPlugin;
 	private filterText = '';
 	private listEl: HTMLElement;
-	private statusEl: HTMLElement;
+	private redownloadBtn: HTMLButtonElement;
 	private selectedEntries: Set<number> = new Set();
 
 	constructor(leaf: WorkspaceLeaf, plugin: SubstackClipperPlugin) {
@@ -33,31 +33,49 @@ export class HistoryView extends ItemView {
 		const { contentEl } = this;
 		contentEl.addClass('substack-clipper-history-view');
 
-		const searchInput = contentEl.createEl('input', {
+		const searchContainer = contentEl.createDiv({ cls: 'substack-clipper-history-search-container' });
+		const searchIconEl = searchContainer.createSpan({ cls: 'substack-clipper-history-search-icon' });
+		setIcon(searchIconEl, 'search');
+		const searchInput = searchContainer.createEl('input', {
 			type: 'text',
-			placeholder: 'Filter by title or author...',
 			cls: 'substack-clipper-history-search',
+			attr: {
+				placeholder: 'Filter by title or author...',
+				'aria-label': 'Filter history entries',
+			},
 		});
-		searchInput.setAttribute('aria-label', 'Filter history entries');
+		const clearBtn = searchContainer.createEl('button', {
+			cls: 'substack-clipper-history-search-clear',
+			attr: {
+				'aria-label': 'Clear filter',
+				'data-tooltip-position': 'top',
+			},
+		});
+		setIcon(clearBtn, 'x');
+		clearBtn.addEventListener('click', () => {
+			searchInput.value = '';
+			this.filterText = '';
+			clearBtn.removeClass('is-visible');
+			this.renderList();
+			searchInput.focus();
+		});
 		searchInput.addEventListener('input', () => {
 			this.filterText = searchInput.value.toLowerCase();
+			clearBtn.toggleClass('is-visible', searchInput.value.length > 0);
 			this.renderList();
 		});
 
 		this.listEl = contentEl.createDiv({ cls: 'substack-clipper-history-list' });
 
-		this.statusEl = contentEl.createDiv({ cls: 'substack-clipper-history-status' });
-		this.statusEl.setAttribute('role', 'status');
-		this.statusEl.setAttribute('aria-live', 'polite');
-
 		const footer = contentEl.createDiv({ cls: 'substack-clipper-history-footer' });
-		const btn = footer.createEl('button', {
+		this.redownloadBtn = footer.createEl('button', {
 			text: 'Re-download comments',
 			cls: 'mod-cta',
+			attr: { 'aria-label': 'Re-download comments for selected entries' },
 		});
-		btn.setAttribute('aria-label', 'Re-download comments for selected entries');
-		btn.addEventListener('click', () => {
-			void this.redownloadComments(btn);
+		this.redownloadBtn.disabled = true;
+		this.redownloadBtn.addEventListener('click', () => {
+			void this.redownloadComments();
 		});
 
 		this.renderList();
@@ -80,9 +98,14 @@ export class HistoryView extends ItemView {
 		);
 	}
 
+	private syncRedownloadBtn(): void {
+		this.redownloadBtn.disabled = this.selectedEntries.size === 0;
+	}
+
 	private renderList(): void {
 		this.listEl.empty();
 		this.selectedEntries.clear();
+		this.syncRedownloadBtn();
 
 		const entries = this.getFilteredEntries();
 
@@ -124,6 +147,7 @@ export class HistoryView extends ItemView {
 				const checked = rowCheckboxes.filter(r => r.checkbox.checked).length;
 				selectAllCb.checked = checked === total;
 				selectAllCb.indeterminate = checked > 0 && checked < total;
+				this.syncRedownloadBtn();
 			});
 
 			const info = row.createDiv({ cls: 'substack-clipper-history-info' });
@@ -191,17 +215,27 @@ export class HistoryView extends ItemView {
 					this.selectedEntries.delete(idx);
 				}
 			}
+			this.syncRedownloadBtn();
 		});
 	}
 
-	private async redownloadComments(btn: HTMLButtonElement): Promise<void> {
+	private setViewDisabled(disabled: boolean): void {
+		this.contentEl.toggleClass('is-disabled', disabled);
+		const inputs = Array.from(this.contentEl.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input, button'));
+		for (const el of inputs) {
+			el.disabled = disabled;
+		}
+	}
+
+	private async redownloadComments(): Promise<void> {
 		if (this.selectedEntries.size === 0) {
 			new Notice('No entries selected.');
 			return;
 		}
 
-		btn.disabled = true;
-		this.statusEl.setText('Downloading...');
+		this.setViewDisabled(true);
+		const notice = new Notice('Re-downloading comments...', 0);
+		notice.containerEl.addClass('is-loading');
 
 		const history = this.plugin.settings.history;
 		const indices = [...this.selectedEntries];
@@ -233,18 +267,15 @@ export class HistoryView extends ItemView {
 		}
 
 		await this.plugin.saveSettings();
+		notice.hide();
+		this.setViewDisabled(false);
 		this.renderList();
-		btn.disabled = false;
 
 		if (failed === 0) {
-			const msg = `Re-downloaded comments for ${String(succeeded)} posts`;
-			this.statusEl.setText(msg);
-			new Notice(msg);
+			new Notice(`Re-downloaded comments for ${String(succeeded)} posts`);
 		} else {
 			const total = succeeded + failed;
-			const msg = `Re-downloaded ${String(succeeded)} of ${String(total)} (${String(failed)} failed)`;
-			this.statusEl.setText(msg);
-			new Notice(msg);
+			new Notice(`Re-downloaded ${String(succeeded)} of ${String(total)} (${String(failed)} failed)`);
 		}
 	}
 }

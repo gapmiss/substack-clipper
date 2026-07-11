@@ -19,14 +19,94 @@
 	gap: var(--size-4-2);
 }
 
+.substack-clipper-history-search-container {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	min-height: 32px;
+	padding: 0 var(--size-4-2);
+	background: var(--background-secondary);
+	border: var(--input-border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+}
+
+.substack-clipper-history-search-container:focus-within {
+	box-shadow: inset 0 0 0 1px var(--background-modifier-border-focus);
+}
+
+.substack-clipper-history-search-icon {
+	display: flex;
+	align-items: center;
+	color: var(--text-faint);
+	flex-shrink: 0;
+}
+
+.substack-clipper-history-search-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
 .substack-clipper-history-search {
-	width: 100%;
-	padding: var(--size-4-2);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: var(--radius-s);
-	background: var(--background-primary);
+	flex: 1;
+	min-width: 0;
+	padding: var(--size-4-1) 0;
+	border: none;
+	border-radius: 0;
+	outline: none;
+	box-shadow: none;
+	background: transparent;
 	color: var(--text-normal);
 	font-size: var(--font-ui-medium);
+}
+
+.substack-clipper-history-search:hover,
+.substack-clipper-history-search:focus,
+.substack-clipper-history-search:focus-visible {
+	border: none;
+	outline: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+.substack-clipper-history-view .substack-clipper-history-search-container input[type="text"] {
+	border: none;
+	outline: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+.substack-clipper-history-search::placeholder {
+	color: var(--text-faint);
+}
+
+.substack-clipper-history-search-clear {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--text-faint);
+	cursor: pointer;
+	flex-shrink: 0;
+	height: 20px;
+	width: 20px;
+	margin: auto;
+	padding: 0;
+}
+
+.substack-clipper-history-search-clear:hover {
+	color: var(--text-muted);
+	background: var(--background-modifier-hover);
+}
+
+.substack-clipper-history-search-clear.is-visible {
+	display: flex;
+}
+
+.substack-clipper-history-search-clear svg {
+	width: 14px;
+	height: 14px;
 }
 
 .substack-clipper-history-list {
@@ -128,11 +208,9 @@
 	text-align: center;
 }
 
-.substack-clipper-history-status {
-	padding: var(--size-4-2) 0;
-	color: var(--text-muted);
-	font-size: var(--font-ui-small);
-	min-height: var(--size-4-4);
+.substack-clipper-history-view.is-disabled {
+	pointer-events: none;
+	opacity: 0.5;
 }
 
 .substack-clipper-history-footer {
