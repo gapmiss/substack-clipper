@@ -94,6 +94,21 @@ function renderComment(
 	return md;
 }
 
+function countNestedComments(comments: Comment[]): number {
+	let total = 0;
+	for (const c of comments) {
+		total += 1;
+		if (c.children) {
+			total += countNestedComments(c.children);
+		}
+	}
+	return total;
+}
+
+export function countAllComments(data: CommentsResponse): number {
+	return countNestedComments(data.comments);
+}
+
 export function renderComments(
 	data: CommentsResponse,
 	slug: string,

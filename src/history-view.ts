@@ -1,7 +1,7 @@
 import { ItemView, normalizePath, Notice, setIcon, TFile, type WorkspaceLeaf } from 'obsidian';
 import type SubstackClipperPlugin from './main';
 import type { HistoryEntry } from './types';
-import { fetchComments, renderComments } from './comments';
+import { countAllComments, fetchComments, renderComments } from './comments';
 
 export const HISTORY_VIEW_TYPE = 'substack-clipper-history';
 
@@ -256,7 +256,22 @@ export class HistoryView extends ItemView {
 						`${this.plugin.settings.saveDirectory}/${entry.username}/${entry.slug}-comments.md`,
 					);
 					await this.plugin.writeFile(commentsPath, commentsMd);
-					entry.commentCount = commentsData.comments.length;
+					entry.commentCount = countAllComments(commentsData);
+
+					const notePath = normalizePath(
+						`${this.plugin.settings.saveDirectory}/${entry.username}/${entry.slug}.md`,
+					);
+					const noteFile = this.app.vault.getAbstractFileByPath(notePath);
+					if (noteFile instanceof TFile) {
+						const content = await this.app.vault.read(noteFile);
+						const updated = content.replace(
+							/^comment-count: \d+$/m,
+							`comment-count: ${String(entry.commentCount)}`,
+						);
+						if (updated !== content) {
+							await this.app.vault.modify(noteFile, updated);
+						}
+					}
 				}
 				entry.lastUpdated = new Date().toISOString();
 				succeeded++;

@@ -8,7 +8,7 @@ import { fetchHtml, extractPreloads, parsePost, parseUrl, extractImages, extract
 import { htmlToMarkdown } from './converter';
 import { postprocessMarkdown } from './postprocess';
 import { downloadAllMedia } from './downloader';
-import { fetchComments, renderComments } from './comments';
+import { countAllComments, fetchComments, renderComments } from './comments';
 
 export default class SubstackClipperPlugin extends Plugin {
 	settings: SubstackClipperSettings;
@@ -115,6 +115,7 @@ export default class SubstackClipperPlugin extends Plugin {
 							await this.writeFile(commentsJsonPath, JSON.stringify(commentsData, null, 2));
 						}
 
+						article.commentCount = countAllComments(commentsData);
 						const commentsMd = renderComments(commentsData, slug, domain);
 						const commentsPath = normalizePath(`${this.settings.saveDirectory}/${username}/${slug}-comments.md`);
 						await this.writeFile(commentsPath, commentsMd);
