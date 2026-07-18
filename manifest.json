@@ -1,7 +1,7 @@
 {
 	"id": "substack-clipper",
 	"name": "Substack Clipper",
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"minAppVersion": "1.13.0",
 	"description": "Archive Substack posts as Markdown with images, media, and comments.",
 	"author": "@gapmiss",
