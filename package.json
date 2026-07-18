@@ -1,6 +1,6 @@
 {
 	"name": "substack-clipper",
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"description": "Clip substack articles",
 	"main": "main.js",
 	"scripts": {
