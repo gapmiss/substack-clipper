@@ -9,29 +9,16 @@ function isSubstackImageUrl(url: string): boolean {
 const VIDEO_PLACEHOLDER_RE = /VIDEOEMBED([a-f0-9-]{36})ENDVIDEO/g;
 
 function replaceVideoDivs(html: string, downloadedUrls: Set<string>): string {
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(html, 'text/html');
-
-	for (const div of Array.from(doc.querySelectorAll('div[id^="media-"]'))) {
-		const id = div.getAttribute('id') ?? '';
-		if (id.length !== 42) continue;
-		const videoId = id.replace('media-', '');
-		const videoUrl = `https://substack.com/api/v1/video/upload/${videoId}/src`;
-		// eslint-disable-next-line obsidianmd/prefer-create-el -- DOMParser document, not Obsidian DOM
-		const p = doc.createElement('p');
-		if (downloadedUrls.has(videoUrl)) {
-			p.textContent = `VIDEOEMBED${videoId}ENDVIDEO`;
-		} else {
-			// eslint-disable-next-line obsidianmd/prefer-create-el -- DOMParser document, not Obsidian DOM
-			const a = doc.createElement('a');
-			a.href = videoUrl;
-			a.textContent = 'Video';
-			p.appendChild(a);
+	return html.replace(
+		/<div[^>]+id="media-([^"]{36})"[^>]*>[\s\S]*?<\/div>/g,
+		(_match, videoId: string) => {
+			const videoUrl = `https://substack.com/api/v1/video/upload/${videoId}/src`;
+			if (downloadedUrls.has(videoUrl)) {
+				return `<p>VIDEOEMBED${videoId}ENDVIDEO</p>`;
+			}
+			return `<p><a href="${videoUrl}">Video</a></p>`;
 		}
-		div.replaceWith(p);
-	}
-
-	return doc.body.innerHTML;
+	);
 }
 
 function restoreVideoWikilinks(md: string): string {
