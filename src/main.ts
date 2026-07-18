@@ -40,6 +40,18 @@ export default class SubstackClipperPlugin extends Plugin {
 				void this.activateHistoryView();
 			},
 		});
+
+		this.registerObsidianProtocolHandler('substack-clipper', (params) => {
+			const url = params.url;
+			if (!url || !url.includes('/p/')) {
+				new Notice('Invalid substack-clipper uri — a "URL" parameter containing /p/ is required.');
+				return;
+			}
+			const openAfterClip = params.open === 'true' ? true
+				: params.open === 'false' ? false
+				: this.settings.openAfterClip;
+			void this.clipPost(url, openAfterClip);
+		});
 	}
 
 	async activateHistoryView(): Promise<void> {

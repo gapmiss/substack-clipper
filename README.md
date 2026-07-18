@@ -61,6 +61,22 @@ Substacks/
 
 The main note includes frontmatter with title, subtitle, type, audience, date, comment count, and links to all media. Comments are embedded via `![[slug-comments]]`.
 
+### URI protocol
+
+You can save a post directly via an `obsidian://` URI without opening the command palette:
+
+```
+obsidian://substack-clipper?vault=MyVault&url=https://alice.substack.com/p/my-article
+```
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `vault` | no | Target vault name (Obsidian prompts if omitted and multiple vaults exist) |
+| `url` | yes | Full Substack post URL (must contain `/p/`) |
+| `open` | no | `true` or `false` — override the "open after saving" setting |
+
+Spaces in vault names should be percent-encoded (`%20`). This works from browsers, scripts, iOS Shortcuts, bookmarklets, and anywhere else that can open a URL.
+
 ## Settings
 
 | Setting | Default | Description |
