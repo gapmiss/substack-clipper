@@ -122,7 +122,7 @@ export class HistoryView extends ItemView {
 		const header = this.listEl.createDiv({ cls: 'substack-clipper-history-header' });
 		const selectAllCb = header.createEl('input', { type: 'checkbox' });
 		selectAllCb.setAttribute('aria-label', 'Select all entries');
-		header.createEl('span', {
+		header.createSpan({
 			text: `${String(entries.length)} ${entries.length === 1 ? 'entry' : 'entries'}`,
 			cls: 'substack-clipper-history-count',
 		});
@@ -151,19 +151,19 @@ export class HistoryView extends ItemView {
 			});
 
 			const info = row.createDiv({ cls: 'substack-clipper-history-info' });
-			info.createEl('span', { text: entry.title, cls: 'substack-clipper-history-title' });
+			info.createSpan({ text: entry.title, cls: 'substack-clipper-history-title' });
 
 			const meta = info.createDiv({ cls: 'substack-clipper-history-meta' });
 			const userLine = meta.createDiv({ cls: 'substack-clipper-history-userline' });
-			userLine.createEl('span', { text: entry.username, cls: 'substack-clipper-history-username' });
+			userLine.createSpan({ text: entry.username, cls: 'substack-clipper-history-username' });
 			if (entry.commentCount > 0) {
-				userLine.createEl('span', {
+				userLine.createSpan({
 					text: String(entry.commentCount),
 					cls: 'substack-clipper-history-badge',
 				});
 			}
 
-			meta.createEl('span', {
+			meta.createSpan({
 				text: new Date(entry.dateSaved).toLocaleDateString(),
 				cls: 'substack-clipper-history-date',
 			});

@@ -11,6 +11,13 @@ export default [
     })),
     // Obsidian plugin rules (v0.3.0+)
     ...obsidianmd.configs.recommended,
+    // converter.ts uses DOMParser documents, not Obsidian DOM
+    {
+        files: ["src/converter.ts"],
+        rules: {
+            "obsidianmd/prefer-create-el": "off",
+        },
+    },
     // Project-specific config
     {
         files: ["src/**/*.ts"],
