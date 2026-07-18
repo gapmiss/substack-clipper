@@ -17,10 +17,12 @@ function replaceVideoDivs(html: string, downloadedUrls: Set<string>): string {
 		if (id.length !== 42) continue;
 		const videoId = id.replace('media-', '');
 		const videoUrl = `https://substack.com/api/v1/video/upload/${videoId}/src`;
+		// eslint-disable-next-line obsidianmd/prefer-create-el -- DOMParser document, not Obsidian DOM
 		const p = doc.createElement('p');
 		if (downloadedUrls.has(videoUrl)) {
 			p.textContent = `VIDEOEMBED${videoId}ENDVIDEO`;
 		} else {
+			// eslint-disable-next-line obsidianmd/prefer-create-el -- DOMParser document, not Obsidian DOM
 			const a = doc.createElement('a');
 			a.href = videoUrl;
 			a.textContent = 'Video';
