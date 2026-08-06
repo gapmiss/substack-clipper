@@ -101,11 +101,12 @@ export class SettingsTab extends PluginSettingTab {
 									btn.onClick(() => {
 										const history = this.plugin.settings.history;
 										if (truncateValue >= history.length) {
-											new Notice(`History already has ${String(history.length)} entries.`);
+											new Notice(`History only has ${String(history.length)} entries, nothing to truncate.`);
 											return;
 										}
 										this.plugin.settings.history = history.slice(-truncateValue);
 										void this.plugin.saveSettings();
+										this.plugin.refreshHistoryView();
 										new Notice(`History truncated to ${String(truncateValue)} entries.`);
 									});
 								});

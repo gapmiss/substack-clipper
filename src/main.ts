@@ -74,6 +74,14 @@ export default class SubstackClipperPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	refreshHistoryView(): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(HISTORY_VIEW_TYPE)) {
+			if (leaf.view instanceof HistoryView) {
+				leaf.view.refresh();
+			}
+		}
+	}
+
 	private async clipPost(url: string, openAfterClip: boolean): Promise<void> {
 		const notice = new Notice('Saving...', 0);
 		notice.containerEl.addClass("is-loading");
@@ -256,11 +264,7 @@ export default class SubstackClipperPlugin extends Plugin {
 			}
 			await this.saveSettings();
 
-			for (const leaf of this.app.workspace.getLeavesOfType(HISTORY_VIEW_TYPE)) {
-				if (leaf.view instanceof HistoryView) {
-					leaf.view.refresh();
-				}
-			}
+			this.refreshHistoryView();
 
 		} catch (e) {
 			notice.hide();

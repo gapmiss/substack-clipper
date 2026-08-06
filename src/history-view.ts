@@ -1,4 +1,4 @@
-import { ItemView, normalizePath, Notice, setIcon, TFile, type WorkspaceLeaf } from 'obsidian';
+import { ConfirmationModal, ItemView, normalizePath, Notice, setIcon, TFile, type WorkspaceLeaf } from 'obsidian';
 import type SubstackClipperPlugin from './main';
 import type { HistoryEntry } from './types';
 import { countAllComments, fetchComments, renderComments } from './comments';
@@ -10,6 +10,7 @@ export class HistoryView extends ItemView {
 	private filterText = '';
 	private listEl: HTMLElement;
 	private redownloadBtn: HTMLButtonElement;
+	private deleteBtn: HTMLButtonElement;
 	private selectedEntries: Set<number> = new Set();
 
 	constructor(leaf: WorkspaceLeaf, plugin: SubstackClipperPlugin) {
@@ -78,6 +79,16 @@ export class HistoryView extends ItemView {
 			void this.redownloadComments();
 		});
 
+		this.deleteBtn = footer.createEl('button', {
+			text: 'Remove selected',
+			cls: 'mod-destructive',
+			attr: { 'aria-label': 'Remove selected entries from history' },
+		});
+		this.deleteBtn.disabled = true;
+		this.deleteBtn.addEventListener('click', () => {
+			this.confirmDeleteSelected();
+		});
+
 		this.renderList();
 	}
 
@@ -98,14 +109,16 @@ export class HistoryView extends ItemView {
 		);
 	}
 
-	private syncRedownloadBtn(): void {
-		this.redownloadBtn.disabled = this.selectedEntries.size === 0;
+	private syncActionButtons(): void {
+		const none = this.selectedEntries.size === 0;
+		this.redownloadBtn.disabled = none;
+		this.deleteBtn.disabled = none;
 	}
 
 	private renderList(): void {
 		this.listEl.empty();
 		this.selectedEntries.clear();
-		this.syncRedownloadBtn();
+		this.syncActionButtons();
 
 		const entries = this.getFilteredEntries();
 
@@ -147,7 +160,7 @@ export class HistoryView extends ItemView {
 				const checked = rowCheckboxes.filter(r => r.checkbox.checked).length;
 				selectAllCb.checked = checked === total;
 				selectAllCb.indeterminate = checked > 0 && checked < total;
-				this.syncRedownloadBtn();
+				this.syncActionButtons();
 			});
 
 			const info = row.createDiv({ cls: 'substack-clipper-history-info' });
@@ -199,9 +212,19 @@ export class HistoryView extends ItemView {
 			removeBtn.setAttribute('data-tooltip-position', 'top');
 			setIcon(removeBtn, 'trash-2');
 			removeBtn.addEventListener('click', () => {
-				this.plugin.settings.history.splice(idx, 1);
-				void this.plugin.saveSettings();
-				this.renderList();
+				const modal = new ConfirmationModal(this.app);
+				modal.setTitle('Remove entry');
+				modal.contentEl.createEl('p', { text: `Remove "${entry.title}" from history?` });
+				modal.addButton(btn => {
+					btn.setButtonText('Remove').setDestructive();
+					btn.onClick(() => {
+						this.plugin.settings.history.splice(idx, 1);
+						void this.plugin.saveSettings();
+						this.renderList();
+					});
+				});
+				modal.addCancelButton();
+				modal.open();
 			});
 		}
 
@@ -215,8 +238,32 @@ export class HistoryView extends ItemView {
 					this.selectedEntries.delete(idx);
 				}
 			}
-			this.syncRedownloadBtn();
+			this.syncActionButtons();
 		});
+	}
+
+	private confirmDeleteSelected(): void {
+		const count = this.selectedEntries.size;
+		if (count === 0) return;
+
+		const modal = new ConfirmationModal(this.app);
+		modal.setTitle('Remove entries');
+		modal.contentEl.createEl('p', {
+			text: `Remove ${String(count)} ${count === 1 ? 'entry' : 'entries'} from history?`,
+		});
+		modal.addButton(btn => {
+			btn.setButtonText('Remove').setDestructive();
+			btn.onClick(() => {
+				const indices = [...this.selectedEntries].sort((a, b) => b - a);
+				for (const idx of indices) {
+					this.plugin.settings.history.splice(idx, 1);
+				}
+				void this.plugin.saveSettings();
+				this.renderList();
+			});
+		});
+		modal.addCancelButton();
+		modal.open();
 	}
 
 	private setViewDisabled(disabled: boolean): void {
