@@ -23,7 +23,7 @@ async function exceedsMaxSize(url: string, maxSizeMB: number): Promise<boolean> 
 			return parseInt(contentLength, 10) > maxSizeMB * 1024 * 1024;
 		}
 	} catch {
-		// HEAD failed or unsupported — proceed with download
+		// HEAD failed or unsupported, so proceed with download
 	}
 	return false;
 }
@@ -138,13 +138,19 @@ export async function downloadAllMedia(
 	}
 
 	const tasks: Promise<{ url: string; ok: boolean }>[] = [];
+	// Different URLs can map to the same file (e.g. the cover image and a body
+	// image with different CDN params). Share one download per path so the
+	// parallel writes don't collide.
+	const byPath = new Map<string, Promise<boolean>>();
 
 	function track(url: string, vaultPath: string): void {
-		tasks.push(
-			downloadToVault(app, url, vaultPath, maxFileSize)
-				.then(ok => ({ url, ok }))
-				.catch(() => ({ url, ok: false })),
-		);
+		const key = normalizePath(vaultPath);
+		let pending = byPath.get(key);
+		if (!pending) {
+			pending = downloadToVault(app, url, key, maxFileSize).catch(() => false);
+			byPath.set(key, pending);
+		}
+		tasks.push(pending.then(ok => ({ url, ok })));
 	}
 
 	for (const url of article.images) {
