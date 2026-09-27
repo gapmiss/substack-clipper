@@ -7,7 +7,7 @@ import { HistoryView, HISTORY_VIEW_TYPE } from './history-view';
 import { fetchHtml, extractPreloads, parsePost, parseUrl, extractImages, extractVideos, extractAudios, extractAttachments } from './parser';
 import { htmlToMarkdown } from './converter';
 import { postprocessMarkdown } from './postprocess';
-import { downloadAllMedia } from './downloader';
+import { downloadAllMedia, imageFilename } from './downloader';
 import { countAllComments, fetchComments, renderComments } from './comments';
 
 export default class SubstackClipperPlugin extends Plugin {
@@ -44,7 +44,7 @@ export default class SubstackClipperPlugin extends Plugin {
 		this.registerObsidianProtocolHandler('substack-clipper', (params) => {
 			const url = params.url;
 			if (!url || !url.includes('/p/')) {
-				new Notice('Invalid substack-clipper uri — a "URL" parameter containing /p/ is required.');
+				new Notice('Invalid link. The "URL" parameter must contain /p/.');
 				return;
 			}
 			const openAfterClip = params.open === 'true' ? true
@@ -194,7 +194,7 @@ export default class SubstackClipperPlugin extends Plugin {
 			}
 
 			// Build frontmatter
-			const frontmatter = this.buildFrontmatter(article, url);
+			const frontmatter = this.buildFrontmatter(article, url, downloadResult.downloaded);
 
 			const finalNote = [
 				'---',
@@ -272,7 +272,7 @@ export default class SubstackClipperPlugin extends Plugin {
 		}
 	}
 
-	private buildFrontmatter(article: ParsedArticle, url: string): string {
+	private buildFrontmatter(article: ParsedArticle, url: string, downloaded: Set<string>): string {
 		const lines: string[] = [];
 
 		lines.push(`title: ${JSON.stringify(article.title.trim())}`);
@@ -286,6 +286,13 @@ export default class SubstackClipperPlugin extends Plugin {
 		lines.push(`link: ${JSON.stringify(url)}`);
 		lines.push(`id: ${article.id}`);
 		lines.push(`comment-count: ${article.commentCount}`);
+
+		if (article.coverImage) {
+			const cover = downloaded.has(article.coverImage)
+				? `[[${imageFilename(article.coverImage)}]]`
+				: article.coverImage;
+			lines.push(`cover-image: ${JSON.stringify(cover)}`);
+		}
 
 		if (article.videos.length) {
 			lines.push('videos:');

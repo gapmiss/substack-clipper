@@ -46,7 +46,7 @@ export class ClipModal extends Modal {
 
 	private submit(): void {
 		if (!this.url || !this.url.includes('/p/')) {
-			new Notice('Invalid URL — must contain /p/ path segment.');
+			new Notice('Invalid URL. It must contain /p/.');
 			return;
 		}
 		this.close();
