@@ -23,13 +23,22 @@ export async function fetchHtml(url: string): Promise<string> {
 export function extractPreloads(html: string): PreloadsJson {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, 'text/html');
+
+	// Current layout: plain JSON in its own script tag
+	const jsonScript = doc.querySelector('script#preloads-json[type="application/json"]');
+	if (jsonScript?.textContent) {
+		return JSON.parse(jsonScript.textContent) as PreloadsJson;
+	}
+
+	// Legacy layout: escaped JSON string inline, window._preloads = JSON.parse("...")
+	const legacyPrefix = 'window._preloads        = JSON.parse("';
 	const scripts = doc.querySelectorAll('script');
 
 	let jsonString = '';
 	for (const script of Array.from(scripts)) {
 		const text = script.textContent ?? '';
-		if (text.startsWith('window._preloads')) {
-			jsonString = text.substring(38);
+		if (text.startsWith(legacyPrefix)) {
+			jsonString = text.substring(legacyPrefix.length);
 			jsonString = jsonString.slice(0, -2);
 			jsonString = jsonString.replace(/\\"/g, '"');
 			jsonString = jsonString.replace(/\\\\"/g, '\\"');

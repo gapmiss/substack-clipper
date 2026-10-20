@@ -217,6 +217,8 @@ javascript:location.href='obsidian://substack-clipper?vault=MyVault&url='+encode
 
 **"Could not find window._preloads in page."** The page didn't look like a Substack post. Either the URL isn't a Substack post, or Substack changed its page layout. If it's a real post, please [open an issue](https://github.com/gapmiss/substack-clipper/issues) with the URL.
 
+**"Save failed: Unexpected token ... is not valid JSON".** You're on version 0.1.14 or older. In October 2026 Substack changed how it stores post data in the page, and older versions can't read the new layout. Update the plugin to 0.1.15 or later.
+
 **"Could not find article content."** The plugin found the post but no body text. The note is still saved with its frontmatter. This can happen with some paid posts and unusual post types.
 
 **Images don't show up offline.** Media downloads are off, so images still point at Substack. Turn on **Download media** and save the post again.
